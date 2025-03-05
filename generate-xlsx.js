@@ -38,6 +38,17 @@ const generateEmail = (rowIndex, options = {}) => {
     return `${username}${randomNum}@${domain}`;
 };
 
+const parseEnumValues = (type) => {
+    // Remove 'enum[' from start and ']' from end
+    const enumString = type.substring(5, type.length - 1);
+    
+    // Split by comma and clean up each value
+    return enumString.split(',').map(value => {
+        // Remove quotes and trim whitespace
+        return value.replace(/['"]/g, '').trim();
+    });
+};
+
 const generateData = (type, rowIndex, columnName, options = {}) => {
     // Ensure row storage exists
     if (!generatedValues.has(rowIndex)) {
@@ -45,7 +56,18 @@ const generateData = (type, rowIndex, columnName, options = {}) => {
     }
     const rowValues = generatedValues.get(rowIndex);
 
-    switch (type.toLowerCase()) {
+    // Check if it's an enum type with values
+    if (type && type.startsWith('enum[') && type.endsWith(']')) {
+        try {
+            const enumValues = parseEnumValues(type);
+            return faker.helpers.arrayElement(enumValues);
+        } catch (error) {
+            console.error(`Error parsing enum values for column ${columnName}:`, error);
+            return '';
+        }
+    }
+
+    switch (type && type.toLowerCase()) {
         case 'uuid':
             return uuidv4();
         case 'name': {
@@ -110,8 +132,29 @@ const generateData = (type, rowIndex, columnName, options = {}) => {
 };
 
 const parseColumnDefinitions = (columnDefs) => {
-    return columnDefs.split(',').map(def => {
-        const [name, type] = def.split(':');
+    // Split by comma, but not inside square brackets
+    const columns = [];
+    let currentDef = '';
+    let bracketCount = 0;
+    
+    for (let i = 0; i < columnDefs.length; i++) {
+        const char = columnDefs[i];
+        if (char === '[') bracketCount++;
+        if (char === ']') bracketCount--;
+        
+        if (char === ',' && bracketCount === 0) {
+            columns.push(currentDef.trim());
+            currentDef = '';
+        } else {
+            currentDef += char;
+        }
+    }
+    if (currentDef) columns.push(currentDef.trim());
+    
+    return columns.map(def => {
+        const colonIndex = def.indexOf(':');
+        const name = def.substring(0, colonIndex).trim();
+        const type = def.substring(colonIndex + 1).trim();
         return { name, type };
     });
 };

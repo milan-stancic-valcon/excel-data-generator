@@ -34,6 +34,18 @@ node generate-xlsx.js <rowCount> <columnDefinitions>
 - end_date: Generate end dates that are always >= corresponding start_date
 - Number: Generate random numbers
 - Boolean: Generate true/false values
+- enum[values]: Generate random values from a specified list
+
+### Enum Type Usage
+
+You can specify enum values as a JSON array in the column definition:
+```bash
+
+# Column with status values
+node generate-xlsx.js 10 "id:UUID,status:enum[Active,Pending,Completed]"
+```
+
+The generator will randomly select values from the provided list for each row.
 
 ### Smart Email Generation
 
@@ -54,7 +66,7 @@ In all cases:
 
 Example with smart email generation:
 ```bash
-node generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email"
+node generate-xlsx.js 10 "id:UUID,firstName:Name,lastName:LastName,email:Email"
 # Might generate: john.smith1234@example.com
 ```
 
@@ -62,14 +74,14 @@ node generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email"
 
 When using start_date and end_date, name your columns with matching prefixes. For example:
 ```bash
-node generate-xlsx.js 100 "projectStartDate:start_date,projectEndDate:end_date"
+node generate-xlsx.js 10 "projectStartDate:start_date,projectEndDate:end_date"
 ```
 This ensures that projectEndDate will always be greater than or equal to projectStartDate.
 
-### Example:
+### Complete Example:
 
 ```bash
-node generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,startDate:start_date,endDate:end_date"
+node generate-xlsx.js 10 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,car:enum[Volvo,Mercedes,BMW],status:enum[active,inactive]"
 ```
 
 This will generate an Excel file in the `results/excel` directory with the format `test_TIMESTAMP.xlsx` containing 100 rows of random data with the specified columns.
