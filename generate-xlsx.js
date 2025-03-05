@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { faker } from '@faker-js/faker';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
+import path from 'path';
+import fs from 'fs';
 
 const generateData = (type, options = {}) => {
     switch (type.toLowerCase()) {
@@ -42,7 +44,24 @@ const parseColumnDefinitions = (columnDefs) => {
     });
 };
 
+const ensureDirectoryExists = (dirPath) => {
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+    }
+};
+
 async function generateExcel(filename, rowCount, columnDefinitions) {
+    // Ensure the results/excel directory exists
+    const resultsDir = path.join(process.cwd(), 'results', 'excel');
+    ensureDirectoryExists(resultsDir);
+
+    // Add timestamp to filename
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const fileBaseName = path.parse(filename).name;
+    const fileExt = path.parse(filename).ext || '.xlsx';
+    const timestampedFilename = `${fileBaseName}_${timestamp}${fileExt}`;
+    const fullPath = path.join(resultsDir, timestampedFilename);
+
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Generated Data');
 
@@ -77,8 +96,9 @@ async function generateExcel(filename, rowCount, columnDefinitions) {
     });
 
     // Save the workbook
-    await workbook.xlsx.writeFile(filename);
-    console.log(`Successfully generated ${filename} with ${rowCount} rows of data.`);
+    await workbook.xlsx.writeFile(fullPath);
+    console.log(`Successfully generated ${timestampedFilename} with ${rowCount} rows of data.`);
+    console.log(`File location: ${fullPath}`);
 }
 
 // Parse command line arguments
