@@ -26,7 +26,7 @@ node generate-xlsx.js <rowCount> <columnDefinitions>
 - UUID: Generate valid UUIDs
 - Name: Generate realistic first names
 - LastName: Generate realistic last names
-- Email: Generate realistic email addresses
+- Email: Generate email addresses (uses Name/LastName if available)
 - Phone: Generate formatted phone numbers
 - Address: Generate realistic street addresses
 - Date: Generate random dates
@@ -34,6 +34,29 @@ node generate-xlsx.js <rowCount> <columnDefinitions>
 - end_date: Generate end dates that are always >= corresponding start_date
 - Number: Generate random numbers
 - Boolean: Generate true/false values
+
+### Smart Email Generation
+
+When generating email addresses, the tool follows these rules:
+1. If both Name and LastName exist:
+   - Creates an email using `firstname.lastname1234@example.com`
+2. If only Name exists:
+   - Creates an email using `firstname1234@example.com`
+3. If only LastName exists:
+   - Creates an email using `lastname1234@example.com`
+4. If neither Name nor LastName exists:
+   - Generates a random username with random number: `username1234@example.com`
+
+In all cases:
+- Random numbers are always > 1000
+- All emails use the `example.com` domain
+- All usernames are converted to lowercase
+
+Example with smart email generation:
+```bash
+node generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email"
+# Might generate: john.smith1234@example.com
+```
 
 ### Date Column Pairs
 
@@ -56,4 +79,3 @@ This will generate an Excel file in the `results/excel` directory with the forma
 All generated files are saved in the `results/excel` directory with automatically generated filenames in the format:
 ```
 test_YYYY-MM-DDTHH-mm-ss-mmmZ.xlsx
-```

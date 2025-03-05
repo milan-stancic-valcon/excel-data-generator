@@ -8,19 +8,58 @@ import { hideBin } from 'yargs/helpers';
 import path from 'path';
 import fs from 'fs';
 
-// Store generated dates for related columns
-const generatedDates = new Map();
+// Store generated values for related columns
+const generatedValues = new Map();
+
+const generateRandomNumber = (min = 1000, max = 9999) => {
+    return faker.number.int({ min, max });
+};
+
+const generateEmail = (rowIndex, options = {}) => {
+    const rowValues = generatedValues.get(rowIndex) || new Map();
+    const firstName = rowValues.get('firstName');
+    const lastName = rowValues.get('lastName');
+    const domain = 'example.com';
+    const randomNum = generateRandomNumber();
+    
+    if (firstName && lastName) {
+        // If both names exist, combine them
+        return `${firstName.toLowerCase()}.${lastName.toLowerCase()}${randomNum}@${domain}`;
+    } else if (firstName) {
+        // Only first name exists
+        return `${firstName.toLowerCase()}${randomNum}@${domain}`;
+    } else if (lastName) {
+        // Only last name exists
+        return `${lastName.toLowerCase()}${randomNum}@${domain}`;
+    }
+    
+    // Neither name exists, generate random email with example.com domain
+    const username = faker.internet.userName();
+    return `${username}${randomNum}@${domain}`;
+};
 
 const generateData = (type, rowIndex, columnName, options = {}) => {
+    // Ensure row storage exists
+    if (!generatedValues.has(rowIndex)) {
+        generatedValues.set(rowIndex, new Map());
+    }
+    const rowValues = generatedValues.get(rowIndex);
+
     switch (type.toLowerCase()) {
         case 'uuid':
             return uuidv4();
-        case 'name':
-            return faker.person.firstName();
-        case 'lastname':
-            return faker.person.lastName();
+        case 'name': {
+            const value = faker.person.firstName();
+            rowValues.set('firstName', value);
+            return value;
+        }
+        case 'lastname': {
+            const value = faker.person.lastName();
+            rowValues.set('lastName', value);
+            return value;
+        }
         case 'email':
-            return faker.internet.email();
+            return generateEmail(rowIndex, options);
         case 'phone':
             return faker.phone.number('###-###-####');
         case 'address':
@@ -35,11 +74,7 @@ const generateData = (type, rowIndex, columnName, options = {}) => {
             const start = options.startDate || new Date(2020, 0, 1);
             const end = options.endDate || new Date();
             const date = faker.date.between({ from: start, to: end });
-            // Store the generated date for this row
-            if (!generatedDates.has(rowIndex)) {
-                generatedDates.set(rowIndex, new Map());
-            }
-            generatedDates.get(rowIndex).set(columnName, date);
+            rowValues.set(columnName, date);
             return date;
         }
         case 'end_date': {
@@ -50,10 +85,9 @@ const generateData = (type, rowIndex, columnName, options = {}) => {
             );
 
             let minDate;
-            if (startDateColumn && generatedDates.has(rowIndex) && 
-                generatedDates.get(rowIndex).has(startDateColumn.name)) {
+            if (startDateColumn && rowValues.has(startDateColumn.name)) {
                 // Use the corresponding start_date as minimum
-                minDate = generatedDates.get(rowIndex).get(startDateColumn.name);
+                minDate = rowValues.get(startDateColumn.name);
             } else {
                 // If no start_date found, use default range
                 minDate = options.startDate || new Date(2020, 0, 1);
@@ -94,8 +128,8 @@ const generateFilename = () => {
 };
 
 async function generateExcel(rowCount, columnDefinitions) {
-    // Clear the generated dates for a new file
-    generatedDates.clear();
+    // Clear the generated values for a new file
+    generatedValues.clear();
 
     // Ensure the results/excel directory exists
     const resultsDir = path.join(process.cwd(), 'results', 'excel');
