@@ -50,17 +50,18 @@ const ensureDirectoryExists = (dirPath) => {
     }
 };
 
-async function generateExcel(filename, rowCount, columnDefinitions) {
+const generateFilename = () => {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    return `test_${timestamp}.xlsx`;
+};
+
+async function generateExcel(rowCount, columnDefinitions) {
     // Ensure the results/excel directory exists
     const resultsDir = path.join(process.cwd(), 'results', 'excel');
     ensureDirectoryExists(resultsDir);
 
-    // Add timestamp to filename
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const fileBaseName = path.parse(filename).name;
-    const fileExt = path.parse(filename).ext || '.xlsx';
-    const timestampedFilename = `${fileBaseName}_${timestamp}${fileExt}`;
-    const fullPath = path.join(resultsDir, timestampedFilename);
+    const filename = generateFilename();
+    const fullPath = path.join(resultsDir, filename);
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Generated Data');
@@ -97,18 +98,14 @@ async function generateExcel(filename, rowCount, columnDefinitions) {
 
     // Save the workbook
     await workbook.xlsx.writeFile(fullPath);
-    console.log(`Successfully generated ${timestampedFilename} with ${rowCount} rows of data.`);
+    console.log(`Successfully generated ${filename} with ${rowCount} rows of data.`);
     console.log(`File location: ${fullPath}`);
 }
 
 // Parse command line arguments
 const argv = yargs(hideBin(process.argv))
-    .command('$0 <filename> <rowCount> <columnDefs>', 'Generate an Excel file with random data', (yargs) => {
+    .command('$0 <rowCount> <columnDefs>', 'Generate an Excel file with random data', (yargs) => {
         yargs
-            .positional('filename', {
-                describe: 'Output Excel filename',
-                type: 'string'
-            })
             .positional('rowCount', {
                 describe: 'Number of rows to generate',
                 type: 'number'
@@ -121,7 +118,7 @@ const argv = yargs(hideBin(process.argv))
     .help()
     .argv;
 
-generateExcel(argv.filename, argv.rowCount, argv.columnDefs)
+generateExcel(argv.rowCount, argv.columnDefs)
     .catch(error => {
         console.error('Error generating Excel file:', error);
         process.exit(1);
