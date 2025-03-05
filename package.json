@@ -1,0 +1,16 @@
+{
+  "name": "excel-data-generator",
+  "version": "1.0.0",
+  "description": "Command-line tool to generate Excel files with random test data",
+  "main": "generate-xlsx.js",
+  "type": "module",
+  "scripts": {
+    "start": "node generate-xlsx.js"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "exceljs": "^4.4.0",
+    "uuid": "^9.0.1",
+    "yargs": "^17.7.2"
+  }
+}
