@@ -29,14 +29,24 @@ node generate-xlsx.js <rowCount> <columnDefinitions>
 - Email: Generate realistic email addresses
 - Phone: Generate formatted phone numbers
 - Address: Generate realistic street addresses
-- Date: Generate dates in standard format
+- Date: Generate random dates
+- start_date: Generate start dates (works in pairs with end_date)
+- end_date: Generate end dates that are always >= corresponding start_date
 - Number: Generate random numbers
 - Boolean: Generate true/false values
+
+### Date Column Pairs
+
+When using start_date and end_date, name your columns with matching prefixes. For example:
+```bash
+node generate-xlsx.js 100 "projectStartDate:start_date,projectEndDate:end_date"
+```
+This ensures that projectEndDate will always be greater than or equal to projectStartDate.
 
 ### Example:
 
 ```bash
-node generate-xlsx.js 100 id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,isActive:Boolean
+node generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,startDate:start_date,endDate:end_date"
 ```
 
 This will generate an Excel file in the `results/excel` directory with the format `test_TIMESTAMP.xlsx` containing 100 rows of random data with the specified columns.

@@ -8,7 +8,10 @@ import { hideBin } from 'yargs/helpers';
 import path from 'path';
 import fs from 'fs';
 
-const generateData = (type, options = {}) => {
+// Store generated dates for related columns
+const generatedDates = new Map();
+
+const generateData = (type, rowIndex, columnName, options = {}) => {
     switch (type.toLowerCase()) {
         case 'uuid':
             return uuidv4();
@@ -22,10 +25,45 @@ const generateData = (type, options = {}) => {
             return faker.phone.number('###-###-####');
         case 'address':
             return faker.location.streetAddress();
-        case 'date':
+        case 'date': {
             const start = options.startDate || new Date(2020, 0, 1);
             const end = options.endDate || new Date();
-            return faker.date.between({ from: start, to: end });
+            const date = faker.date.between({ from: start, to: end });
+            return date;
+        }
+        case 'start_date': {
+            const start = options.startDate || new Date(2020, 0, 1);
+            const end = options.endDate || new Date();
+            const date = faker.date.between({ from: start, to: end });
+            // Store the generated date for this row
+            if (!generatedDates.has(rowIndex)) {
+                generatedDates.set(rowIndex, new Map());
+            }
+            generatedDates.get(rowIndex).set(columnName, date);
+            return date;
+        }
+        case 'end_date': {
+            // Find the corresponding start_date column
+            const startDateColumn = options.columns.find(col => 
+                col.type.toLowerCase() === 'start_date' &&
+                col.name.toLowerCase().replace('start', 'end') === columnName.toLowerCase()
+            );
+
+            let minDate;
+            if (startDateColumn && generatedDates.has(rowIndex) && 
+                generatedDates.get(rowIndex).has(startDateColumn.name)) {
+                // Use the corresponding start_date as minimum
+                minDate = generatedDates.get(rowIndex).get(startDateColumn.name);
+            } else {
+                // If no start_date found, use default range
+                minDate = options.startDate || new Date(2020, 0, 1);
+            }
+            
+            const maxDate = options.endDate || new Date();
+            // Generate date between start_date and maxDate
+            const date = faker.date.between({ from: minDate, to: maxDate });
+            return date;
+        }
         case 'number':
             const min = options.min || 0;
             const max = options.max || 1000;
@@ -56,6 +94,9 @@ const generateFilename = () => {
 };
 
 async function generateExcel(rowCount, columnDefinitions) {
+    // Clear the generated dates for a new file
+    generatedDates.clear();
+
     // Ensure the results/excel directory exists
     const resultsDir = path.join(process.cwd(), 'results', 'excel');
     ensureDirectoryExists(resultsDir);
@@ -79,7 +120,7 @@ async function generateExcel(rowCount, columnDefinitions) {
     for (let i = 0; i < rowCount; i++) {
         const row = {};
         columns.forEach(col => {
-            row[col.name] = generateData(col.type);
+            row[col.name] = generateData(col.type, i, col.name, { columns });
         });
         worksheet.addRow(row);
     }
@@ -87,6 +128,13 @@ async function generateExcel(rowCount, columnDefinitions) {
     // Apply some styling
     worksheet.getRow(1).font = { bold: true };
     worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+
+    // Format date columns
+    columns.forEach(col => {
+        if (['date', 'start_date', 'end_date'].includes(col.type.toLowerCase())) {
+            worksheet.getColumn(col.name).numFmt = 'yyyy-mm-dd';
+        }
+    });
 
     // Auto-fit columns
     worksheet.columns.forEach(column => {
