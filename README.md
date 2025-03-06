@@ -4,17 +4,39 @@ A command-line tool to generate Excel (XLSX) files with random test data.
 
 ## Installation
 
+### Local Installation
 1. Clone this repository
 2. Install dependencies:
 ```bash
 npm install
 ```
 
+### Docker Installation
+1. Build the Docker image:
+```bash
+docker build -t excel-generator .
+```
+
 ## Usage
 
+### Local Usage
 ```bash
 node generate-xlsx.js <rowCount> <columnDefinitions>
 ```
+
+### Docker Usage
+```bash
+# Basic usage (prints help)
+docker run excel-generator
+
+# Generate data
+docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "id:UUID,name:Name"
+
+# Windows PowerShell
+docker run -v "${PWD}/results:/usr/src/app/results" excel-generator 100 "id:UUID,name:Name"
+```
+
+Note: The `-v` flag maps your local `results` directory to the container's output directory, allowing you to access the generated files.
 
 ### Parameters:
 
@@ -40,9 +62,11 @@ node generate-xlsx.js <rowCount> <columnDefinitions>
 
 You can specify enum values as a JSON array in the column definition:
 ```bash
+# Local usage
+node generate-xlsx.js 100 "id:UUID,carBrand:enum[\"Volvo\",\"Mercedes\",\"Audi\"]"
 
-# Column with status values
-node generate-xlsx.js 10 "id:UUID,status:enum[Active,Pending,Completed]"
+# Docker usage
+docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "id:UUID,carBrand:enum[\"Volvo\",\"Mercedes\",\"Audi\"]"
 ```
 
 The generator will randomly select values from the provided list for each row.
@@ -66,22 +90,33 @@ In all cases:
 
 Example with smart email generation:
 ```bash
-node generate-xlsx.js 10 "id:UUID,firstName:Name,lastName:LastName,email:Email"
-# Might generate: john.smith1234@example.com
+# Local usage
+node generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email"
+
+# Docker usage
+docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "id:UUID,firstName:Name,lastName:LastName,email:Email"
 ```
 
 ### Date Column Pairs
 
 When using start_date and end_date, name your columns with matching prefixes. For example:
 ```bash
-node generate-xlsx.js 10 "projectStartDate:start_date,projectEndDate:end_date"
+# Local usage
+node generate-xlsx.js 100 "projectStartDate:start_date,projectEndDate:end_date"
+
+# Docker usage
+docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "projectStartDate:start_date,projectEndDate:end_date"
 ```
 This ensures that projectEndDate will always be greater than or equal to projectStartDate.
 
 ### Complete Example:
 
 ```bash
-node generate-xlsx.js 10 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,car:enum[Volvo,Mercedes,BMW],status:enum[active,inactive]"
+# Local usage
+node generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,carBrand:enum[\"Volvo\",\"Mercedes\",\"BMW\"],status:enum[\"Active\",\"Inactive\"]"
+
+# Docker usage
+docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,carBrand:enum[\"Volvo\",\"Mercedes\",\"BMW\"],status:enum[\"Active\",\"Inactive\"]"
 ```
 
 This will generate an Excel file in the `results/excel` directory with the format `test_TIMESTAMP.xlsx` containing 100 rows of random data with the specified columns.
