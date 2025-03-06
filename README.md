@@ -63,10 +63,10 @@ Note: The `-v` flag maps your local `results` directory to the container's outpu
 You can specify enum values as a comma-separated list in the column definition:
 ```bash
 # Local usage
-node generate-xlsx.js 100 "id:UUID,carBrand:enum[Volvo,Mercedes,Audi]"
+node generate-xlsx.js 100 "id:UUID,status:enum[To Do,In Progress,Blocked,Done]"
 
 # Docker usage
-docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "id:UUID,carBrand:enum[Volvo,Mercedes,Audi]"
+docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "id:UUID,status:enum[To Do,In Progress,Blocked,Done]"
 ```
 
 The generator will randomly select values from the provided list for each row.
@@ -113,10 +113,10 @@ This ensures that projectEndDate will always be greater than or equal to project
 
 ```bash
 # Local usage
-node generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,carBrand:enum[Volvo,Mercedes,BMW],status:enum[Active,Inactive]"
+node generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,startDate:start_date,endDate:end_date,status:enum[To Do,In Progress,Blocked,Done]"
 
 # Docker usage
-docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,carBrand:enum[Volvo,Mercedes,BMW],status:enum[Active,Inactive]"
+docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,startDate:start_date,endDate:end_date,status:enum[To Do,In Progress,Blocked,Done]"
 ```
 
 This will generate an Excel file in the `results/excel` directory with the format `test_TIMESTAMP.xlsx` containing 100 rows of random data with the specified columns.
