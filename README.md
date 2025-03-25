@@ -1,6 +1,6 @@
-# Excel Data Generator
+# Excel and CSV Data Generator
 
-A command-line tool to generate Excel (XLSX) files with random test data.
+A command-line tool to generate Excel (XLSX) and CSV files with random test data.
 
 ## Installation
 
@@ -14,26 +14,33 @@ npm install
 ### Docker Installation
 1. Build the Docker image:
 ```bash
-docker build -t excel-generator .
+docker build -t data-generator .
 ```
 
 ## Usage
 
 ### Local Usage
 ```bash
+# Generate Excel file
 node generate-xlsx.js <rowCount> <columnDefinitions>
+
+# Generate CSV file
+node generate-csv.js <rowCount> <columnDefinitions>
 ```
 
 ### Docker Usage
 ```bash
 # Basic usage (prints help)
-docker run excel-generator
+docker run data-generator
 
-# Generate data
-docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "id:UUID,name:Name"
+# Generate Excel file
+docker run -v "$(pwd)/results:/usr/src/app/results" data-generator generate-xlsx.js 100 "id:UUID,name:Name"
+
+# Generate CSV file
+docker run -v "$(pwd)/results:/usr/src/app/results" data-generator generate-csv.js 100 "id:UUID,name:Name"
 
 # Windows PowerShell
-docker run -v "${PWD}/results:/usr/src/app/results" excel-generator 100 "id:UUID,name:Name"
+docker run -v "${PWD}/results:/usr/src/app/results" data-generator generate-xlsx.js 100 "id:UUID,name:Name"
 ```
 
 Note: The `-v` flag maps your local `results` directory to the container's output directory, allowing you to access the generated files.
@@ -62,11 +69,17 @@ Note: The `-v` flag maps your local `results` directory to the container's outpu
 
 You can specify enum values as a comma-separated list in the column definition:
 ```bash
-# Local usage
+# Local usage - Excel
 node generate-xlsx.js 100 "id:UUID,status:enum[To Do,In Progress,Blocked,Done]"
 
-# Docker usage
-docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "id:UUID,status:enum[To Do,In Progress,Blocked,Done]"
+# Local usage - CSV
+node generate-csv.js 100 "id:UUID,status:enum[To Do,In Progress,Blocked,Done]"
+
+# Docker usage - Excel
+docker run -v "$(pwd)/results:/usr/src/app/results" data-generator generate-xlsx.js 100 "id:UUID,status:enum[To Do,In Progress,Blocked,Done]"
+
+# Docker usage - CSV
+docker run -v "$(pwd)/results:/usr/src/app/results" data-generator generate-csv.js 100 "id:UUID,status:enum[To Do,In Progress,Blocked,Done]"
 ```
 
 The generator will randomly select values from the provided list for each row.
@@ -90,39 +103,69 @@ In all cases:
 
 Example with smart email generation:
 ```bash
-# Local usage
+# Local usage - Excel
 node generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email"
 
-# Docker usage
-docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "id:UUID,firstName:Name,lastName:LastName,email:Email"
+# Local usage - CSV
+node generate-csv.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email"
+
+# Docker usage - Excel
+docker run -v "$(pwd)/results:/usr/src/app/results" data-generator generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email"
+
+# Docker usage - CSV
+docker run -v "$(pwd)/results:/usr/src/app/results" data-generator generate-csv.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email"
 ```
 
 ### Date Column Pairs
 
 When using start_date and end_date, name your columns with matching prefixes. For example:
 ```bash
-# Local usage
+# Local usage - Excel
 node generate-xlsx.js 100 "projectStartDate:start_date,projectEndDate:end_date"
 
-# Docker usage
-docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "projectStartDate:start_date,projectEndDate:end_date"
+# Local usage - CSV
+node generate-csv.js 100 "projectStartDate:start_date,projectEndDate:end_date"
+
+# Docker usage - Excel
+docker run -v "$(pwd)/results:/usr/src/app/results" data-generator generate-xlsx.js 100 "projectStartDate:start_date,projectEndDate:end_date"
+
+# Docker usage - CSV
+docker run -v "$(pwd)/results:/usr/src/app/results" data-generator generate-csv.js 100 "projectStartDate:start_date,projectEndDate:end_date"
 ```
 This ensures that projectEndDate will always be greater than or equal to projectStartDate.
 
 ### Complete Example:
 
 ```bash
-# Local usage
+# Local usage - Excel
 node generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,startDate:start_date,endDate:end_date,status:enum[To Do,In Progress,Blocked,Done]"
 
-# Docker usage
-docker run -v "$(pwd)/results:/usr/src/app/results" excel-generator 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,startDate:start_date,endDate:end_date,status:enum[To Do,In Progress,Blocked,Done]"
-```
+# Local usage - CSV
+node generate-csv.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,startDate:start_date,endDate:end_date,status:enum[To Do,In Progress,Blocked,Done]"
 
-This will generate an Excel file in the `results/excel` directory with the format `test_TIMESTAMP.xlsx` containing 100 rows of random data with the specified columns.
+# Docker usage - Excel
+docker run -v "$(pwd)/results:/usr/src/app/results" data-generator generate-xlsx.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,startDate:start_date,endDate:end_date,status:enum[To Do,In Progress,Blocked,Done]"
+
+# Docker usage - CSV
+docker run -v "$(pwd)/results:/usr/src/app/results" data-generator generate-csv.js 100 "id:UUID,firstName:Name,lastName:LastName,email:Email,phone:Phone,startDate:start_date,endDate:end_date,status:enum[To Do,In Progress,Blocked,Done]"
+```
 
 ### Output Location
 
-All generated files are saved in the `results/excel` directory with automatically generated filenames in the format:
-```
-test_YYYY-MM-DDTHH-mm-ss-mmmZ.xlsx
+Generated files are saved in the following directories with automatically generated filenames:
+- Excel files: `results/excel/test_YYYY-MM-DDTHH-mm-ss-mmmZ.xlsx`
+- CSV files: `results/csv/test_YYYY-MM-DDTHH-mm-ss-mmmZ.csv`
+
+### Format Differences
+
+#### Excel Format (.xlsx)
+- Column headers are bold and centered
+- Dates are formatted as proper Excel dates (allows sorting and filtering)
+- Columns are auto-sized to fit content
+- Data types are preserved (numbers, dates, text)
+
+#### CSV Format (.csv)
+- Simple text format with comma-separated values
+- Dates are formatted as YYYY-MM-DD
+- Strings containing commas, quotes, or newlines are properly escaped
+- All values are stored as text

@@ -1,11 +1,17 @@
 {
   "name": "excel-data-generator",
   "version": "1.0.0",
-  "description": "Command-line tool to generate Excel files with random test data",
+  "description": "Generate Excel and CSV files with random test data",
   "main": "generate-xlsx.js",
   "type": "module",
+  "bin": {
+    "generate-xlsx": "./generate-xlsx.js",
+    "generate-csv": "./generate-csv.js"
+  },
   "scripts": {
-    "start": "node generate-xlsx.js"
+    "start": "node generate-xlsx.js",
+    "generate-xlsx": "node generate-xlsx.js",
+    "generate-csv": "node generate-csv.js"
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",

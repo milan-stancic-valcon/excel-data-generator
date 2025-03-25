@@ -1,3 +1,4 @@
 node_modules/
 results/excel/*.xlsx
+results/csv/*.csv
 .DS_Store

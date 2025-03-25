@@ -13,11 +13,14 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Create directory for output files
-RUN mkdir -p results/excel
+# Create directories for output files
+RUN mkdir -p results/excel results/csv
+
+# Make the script files executable
+RUN chmod +x generate-xlsx.js generate-csv.js
 
 # Set the entrypoint to node
-ENTRYPOINT ["node", "generate-xlsx.js"]
+ENTRYPOINT ["node"]
 
 # Default command (can be overridden)
 CMD ["--help"]
