@@ -46,7 +46,7 @@ async function generateExcel(rowCount, columnDefinitions) {
     // Format date columns
     columns.forEach(col => {
         if (['date', 'start_date', 'end_date'].includes(col.type.toLowerCase())) {
-            worksheet.getColumn(col.name).numFmt = 'yyyy-mm-dd';
+            worksheet.getColumn(col.name).numFmt = 'dd-mm-yyyy';
         }
     });
 
