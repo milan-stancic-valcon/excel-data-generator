@@ -32,15 +32,16 @@ async function generateCSV(rowCount, columnDefinitions) {
             const value = generateData(col.type, i, col.name, { columns });
             
             if (value instanceof Date) {
-                //return value.toISOString().split('T')[0]; // yyyy-mm-dd format
+                return value.toISOString().split('T')[0]; // yyyy-mm-dd format
 
+                /* Uncomment the following lines to format date as dd-mm-yyyy
                 // Extract day, month, and year
                 const day = String(value.getDate()).padStart(2, '0');
                 const month = String(value.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
                 const year = value.getFullYear();
                 
                 // Return in dd-mm-yyyy format
-                return `${day}-${month}-${year}`;
+                return `${day}-${month}-${year}`;*/
             }
             
             // Escape and quote strings if they contain special characters

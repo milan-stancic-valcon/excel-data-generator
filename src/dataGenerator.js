@@ -33,6 +33,8 @@ const generateEmail = (rowIndex, options = {}) => {
 };
 
 export const generateData = (type, rowIndex, columnName, options = {}) => {
+    let min = 0;;
+    let max = 9999999;
     // Ensure row storage exists
     if (!generatedValues.has(rowIndex)) {
         generatedValues.set(rowIndex, new Map());
@@ -104,9 +106,17 @@ export const generateData = (type, rowIndex, columnName, options = {}) => {
             return date;
         }
         case 'number':
-            const min = options.min || 0;
-            const max = options.max || 1000;
+            min = options.min || 0;
+            max = options.max || 1000;
             return faker.number.int({ min, max });
+        case 'int32':
+            min = options.min || -2147483648;
+            max = options.max || 2147483647;
+                return faker.number.int({ min, max });
+        case 'int64':
+            min = options.min || -9223372036854775808;
+            max = options.max || 9223372036854775807;
+                return faker.number.int({ min, max });
         case 'boolean':
             return faker.datatype.boolean();
         default:
